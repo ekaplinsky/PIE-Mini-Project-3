@@ -21,7 +21,7 @@ def change_speed_clicked():
     this gets picked up in the arduino code, which will change the speed of the
     car.
     """
-    serial_port.write(2000)
+    serial_port.write(int(a.get()))
     print(f"changing speed to {int(a.get())}")
 
 
