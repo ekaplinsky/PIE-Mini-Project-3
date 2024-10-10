@@ -22,14 +22,20 @@ def change_speed_clicked():
     car.
     """
     serial_port.write(2000)
-    print("button clicked")
+    print(f"changing speed to {int(a.get())}")
 
 
+# initializing the popup called 'root' and setting it's size
 root = tk.Tk()
+root.geometry("700x350")
+
+tk.Label(root, text="Enter Speed (0-255)").pack()
+a = tk.Entry(root, width=35)
+a.pack()
 
 button = tk.Button(
     root,
-    text="speed changer",
+    text="Change Speed",
     command=change_speed_clicked,
     activebackground="blue",
     activeforeground="white",
