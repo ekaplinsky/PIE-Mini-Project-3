@@ -1,35 +1,41 @@
 #include <Adafruit_MotorShield.h>
+
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+
 int leftSensor; //left sensor reading
 int rightSensor; //right sensor reading
 int left; //left motor status
 int right; //right motor status
-int cutoff= 20; //sensor calibration cutoff- tape or not tape
-Adafruit_DCMotor *leftMotor = AFMS.getMotor(1); //set up left motor
-Adafruit_DCMotor *rightMotor = AFMS.getMotor(2); //set up right motor
+int cutoff= 600; //sensor calibration cutoff- tape or not tape
+
+Adafruit_DCMotor *leftMotor = AFMS.getMotor(3); //set up left motor
+Adafruit_DCMotor *rightMotor = AFMS.getMotor(4); //set up right motor
+
 int incomingSpeed = 20; // for speed from python
 
 void setup() { // put your setup code here, to run once:
- pinMode(1, INPUT); 
- pinMode(2, INPUT);
+  
+  pinMode(1, INPUT); 
+  pinMode(2, INPUT);
+ 
   Serial.begin(9600);           
-  Serial.println("Adafruit Motorshield v2 - DC Motor test!");
 
   if (!AFMS.begin()) {         // create with the default frequency 1.6KHz
-  // if (!AFMS.begin(1000)) {  // OR with a different frequency, say 1KHz
-    Serial.println("Could not find Motor Shield. Check wiring.");
+    //Serial.println("Could not find Motor Shield. Check wiring.");
     while (1);
   }
-  Serial.println("Motor Shield found.");
+  //Serial.println("Motor Shield found.");
 
   
   // Set start speed (0 (off) to 255 (max speed))
-  leftMotor->setSpeed(50);
-  rightMotor->setSpeed(50);
+  leftMotor->setSpeed(25);
+  rightMotor->setSpeed(25);
 
   //Set motors ON
   left= 1;
   right= 1;
+  
+
 }
 
 void loop() {
@@ -38,11 +44,17 @@ void loop() {
   // if there is data from computer get new speed:
   if (Serial.available() > 0) {
     // read the incoming byte:
-    incomingSpeed = Serial.read();
+//    incomingSpeed = Serial.read();/
+
   }
 
-  leftSensor= digitalRead(1); //pin for left sensor
-  rightSensor= digitalRead(2); //pin for right sensor
+  incomingSpeed = 30;
+  
+  leftSensor= analogRead(2); //pin for left sensor
+  rightSensor= analogRead(0); //pin for right sensor
+  Serial.print(leftSensor);
+  Serial.print(" ");
+  Serial.println(rightSensor);
   if (leftSensor > cutoff); //set sensor variables to 0 and 1 for on black or not on black
     left= 1;
   if (leftSensor < cutoff);
@@ -53,25 +65,24 @@ void loop() {
     right= 0; 
 
 
-  if (left==1 && right==1){ //if both sensors not on line go forwards
-   leftMotor->run(FORWARD);
-   rightMotor->run(FORWARD);
-  
-  }
-  else if (left==1 && right==0){ //if right sensor on line go right
+  if (!left && !right){ //if both sensors not on line go forwards
    leftMotor->run(FORWARD);
    rightMotor->run(BACKWARD);
   
   }
-  else if (left==0 && right==1){ //if left sensor on line go left
-   leftMotor->run(BACKWARD);
-   rightMotor->run(FORWARD);
+  else if (!left && right){ //if right sensor on line go right
+   leftMotor->run(FORWARD);
+   rightMotor->run(RELEASE);
   
   }
-  leftMotor->setSpeed(incomingSpeed); //reset sensor speed
-  rightMotor->setSpeed(incomingSpeed);
-  Serial.print(leftSensor);
-  Serial.print(left);
-  delay(15); //delay 
+  else if (left && !right){ //if left sensor on line go left
+   leftMotor->run(RELEASE);
+   rightMotor->run(BACKWARD);
+  
+  }
+  //leftMotor->setSpeed(incomingSpeed); //reset sensor speed
+  //rightMotor->setSpeed(incomingSpeed);
+  //Serial.print(leftSensor);
+  //Serial.print(left);
+  //delay(15); //delay 
 }
-
